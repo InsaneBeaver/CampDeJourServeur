@@ -19,15 +19,10 @@ import javax.crypto.Cipher;
 public class RSAEncryption {
     
     PublicKey clePublique;
-    private static byte[] lireFichier(String chemin) throws IOException
-    {
-        Path path = Paths.get(chemin);
-        return Files.readAllBytes(path);
-    }
     
     public RSAEncryption(String fichierClePublique) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException
     {
-        this(lireFichier(fichierClePublique));
+        this(RSAUtil.lireFichier(fichierClePublique));
     }
     
     public RSAEncryption(byte[] clePublique) throws NoSuchAlgorithmException, InvalidKeySpecException
@@ -46,10 +41,10 @@ public class RSAEncryption {
         for(int i = 0; i < RSAUtil.TAILLE_BRUIT; i++)
             message += (char)r.nextInt(128);
         
-        Cipher cipher = Cipher.getInstance("RSA");  
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, clePublique); 
         byte [] encrypted = cipher.doFinal(message.getBytes());
-        return Base64.getEncoder().encodeToString(encrypted);
+        return Base64Coder.encode(encrypted);
                 
     }
     
@@ -57,8 +52,9 @@ public class RSAEncryption {
     {
         Signature publicSignature = Signature.getInstance("SHA256withRSA");
         publicSignature.initVerify(clePublique);
-        publicSignature.update(Base64.getDecoder().decode(signatureRecue));
+        System.out.println("La signature " + signatureRecue.length());
+        publicSignature.update(messageAttendu.getBytes());
         
-        return publicSignature.verify(messageAttendu.getBytes());
+        return publicSignature.verify(Base64Coder.decode(signatureRecue));
     }
 }

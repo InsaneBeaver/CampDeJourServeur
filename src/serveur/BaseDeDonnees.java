@@ -70,16 +70,8 @@ public class BaseDeDonnees {
        JSONArray listeARetourner = new JSONArray();
        for(int i = 0; i < liste.length(); i++)
        {
-           JSONObject infoEnfant = new JSONObject();
            int id = liste.getInt(i);
-           ResultSet rs_enfant = connexion.createStatement().executeQuery("SELECT prenom, dateNaissance, estPresent from " + TABLE_ENFANTS + " where id=" + id);
-           rs_enfant.next();
-
-           infoEnfant.put("id", id);
-           infoEnfant.put("prenom", rs_enfant.getString("prenom"));
-           infoEnfant.put("dateNaissance", rs_enfant.getString("dateNaissance"));
-           infoEnfant.put("estPresent", rs_enfant.getInt("estPresent") == 1);
-           listeARetourner.put(infoEnfant);
+           listeARetourner.put(getEnfant(id));
        }
        return listeARetourner.toString();
     }

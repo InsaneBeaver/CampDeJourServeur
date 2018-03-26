@@ -43,13 +43,11 @@ public class RSAUtil {
     
     public static byte[] lireFichier(String chemin) throws IOException
     {
-        if(chemin.length() == 0) return new byte[0];
         Path path = Paths.get(chemin);
         return Files.readAllBytes(path);
     }
 
     public final static int TAILLE_BRUIT = 16; // Caractères aléatoires mis à la fin du message. 16 caractères => une chance sur 5192296858534827628530496329220096 qu'un message soit encrypté de la même façon deux fois.
     public final static int TAILLE_CLE = 2048;
-    public final static int TAILLE_SIGNATURE = 16;
 }
            

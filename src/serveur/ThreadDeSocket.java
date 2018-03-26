@@ -51,13 +51,20 @@ public class ThreadDeSocket extends Thread {
                         encryption = new RSAEncryption(clePubliqueBytes);
                                                
                         // Par sécurité, on signe la ligne. 
-                        out.writeBytes(decryption.creerSignature(line)+'\n');
+                        String sgn = decryption.creerSignature(line);
+                        System.out.println(sgn);
+                        RSAEncryption foobar = new RSAEncryption("clepubliqueserv");
+                        System.out.println(foobar.authentifierSignature(sgn, line));
+                        out.writeBytes(sgn+'\n');
                         out.flush();
                        
                     }
                     else
                     {
+
                         line = decryption.decrypter(line);
+                        System.out.println("Le message: " + line);
+                        
                         try {
                             String message = encryption.encrypter(interServ.executerCommande(line));
                             out.writeBytes(message + "\n");
@@ -65,6 +72,7 @@ public class ThreadDeSocket extends Thread {
                             e.printStackTrace();
                         }
                         out.flush();
+
                     }
                 }
             }

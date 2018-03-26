@@ -11,6 +11,8 @@ public class Serveur {
 
      public static void main(String args[]) throws Exception{
          RSADecryption decryption = new RSADecryption("clepriveeserv");
+         RSAEncryption encryption = new RSAEncryption("clepubliqueserv");
+
          
          ServerSocket serverSocket;
          InterfaceServeur interfaceServeur = new InterfaceServeur();

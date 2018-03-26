@@ -25,7 +25,7 @@ public class InterfaceServeur
         bdd = new BaseDeDonnees();
     }
     
-    String executerCommande(String cmd) throws SQLException
+    String executerCommsande(String cmd) throws SQLException
     {
         String[] decoupage = cmd.split(" ");
         if(decoupage[0].equals("liste"))
