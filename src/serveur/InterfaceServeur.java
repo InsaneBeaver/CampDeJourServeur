@@ -16,37 +16,49 @@ import org.json.JSONArray;
 
 public class InterfaceServeur
 {
-    BaseDeDonnees bdd;
-    private final int keySize = 1024;
-    private final String hashMdpAdmin = "YGy1nx6e2TBtxc3uiaMohjUh37vFEhOgYpagjLROSF4=";
-    
+    public final BaseDeDonnees bdd;
     public InterfaceServeur() throws SQLException, ClassNotFoundException
     {
         bdd = new BaseDeDonnees();
     }
     
-    String executerCommsande(String cmd) throws SQLException
+    String executerCommande(String cmd) throws SQLException
     {
-        String[] decoupage = cmd.split(" ");
-        if(decoupage[0].equals("liste"))
-            return getListeEnfants(decoupage[1]);
-        
-        else if(decoupage[0].equals("getenfant") && estPermis(decoupage[1], Integer.parseInt(decoupage[2])))
-            return bdd.getEnfant(Integer.parseInt(decoupage[2]));
-        
-        else if(decoupage[0].equals("setpresence") && estPermis(decoupage[1], Integer.parseInt(decoupage[2])))
-        {
-            bdd.changerPresence(Integer.parseInt(decoupage[2]), decoupage[3]);
-            return "ok";
+        try {
+            String[] decoupage = cmd.split(" ");
+            String nomCommande = decoupage[0];
+            String mdpHashe = "";
+            if(decoupage.length > 1) 
+                mdpHashe = bdd.getHash(decoupage[1]);
+            if(nomCommande.equals("liste"))
+                return getListeEnfants(mdpHashe);
+
+            else if(nomCommande.equals("getenfant") && estPermis(mdpHashe, Integer.parseInt(decoupage[2])))
+                return bdd.getEnfant(Integer.parseInt(decoupage[2]));
+
+            else if(nomCommande.equals("setpresence") && estPermis(mdpHashe, Integer.parseInt(decoupage[2])))
+            {
+                bdd.changerPresence(Integer.parseInt(decoupage[2]), Integer.parseInt(decoupage[3]));
+                return "ok";
+            }
+/*
+            else if(decoupage[0].equals("ajoutparent") && bdd.getHash(decoupage[1]).equals(hashMdpAdmin))
+            {
+                bdd.mettreParent(decoupage[2], decoupage[3]);
+                return "ok";
+            }
+*/
+            else if(nomCommande.equals("ping"))
+                return "pong";
+
         }
-        
-        else if(decoupage[0].equals("ajoutparent") && bdd.getHash(decoupage[1]).equals(hashMdpAdmin))
+        catch(Exception e)
         {
-            bdd.mettreParent(decoupage[2], decoupage[3]);
-            return "ok";
+            e.printStackTrace();
         }
         
         return "Erreur";
+        
     }
     
     String getListeEnfants(String mdp) throws SQLException
@@ -54,8 +66,8 @@ public class InterfaceServeur
         return bdd.getEnfants(mdp);
     }
     
-    boolean estPermis(String mdp, int id) throws SQLException
+    boolean estPermis(String mdpHashe, int id) throws SQLException
     {
-        return bdd.estPermis(bdd.getHash(mdp), id);
+        return bdd.estPermis(mdpHashe, id);
     }
 }

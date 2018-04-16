@@ -46,13 +46,14 @@ public class BaseDeDonnees {
 
     }
     
-    public void changerPresence(int id, String nouvelEtat) throws SQLException
+    public void changerPresence(int id, int nouvelEtat) throws SQLException
     {
         connexion.createStatement().execute("UPDATE " + TABLE_ENFANTS + " SET estPresent='" + nouvelEtat + "' WHERE id=" + id);
     }
     
     public boolean estPermis(String hash, int id) throws SQLException
     {
+        System.out.println("LE HASH " + hash);
         ResultSet rs = connexion.createStatement().executeQuery("SELECT enfants from " + TABLE_PARENTS_ENFANTS + " where mdphash='" + hash+"'");
         rs.next();
         JSONArray liste = new JSONArray(rs.getString("enfants"));
@@ -61,9 +62,9 @@ public class BaseDeDonnees {
         return estPermis;
     }
     
-    public String getEnfants(String mdp) throws SQLException
+    public String getEnfants(String mdpHashe) throws SQLException
     {
-       ResultSet rs = connexion.createStatement().executeQuery("SELECT * from " + TABLE_PARENTS_ENFANTS + " where mdphash='" + getHash(mdp) + "'");
+       ResultSet rs = connexion.createStatement().executeQuery("SELECT * from " + TABLE_PARENTS_ENFANTS + " where mdphash='" + mdpHashe + "'");
        if(!rs.next()) return "[]";
        
        JSONArray liste = new JSONArray(rs.getString("enfants"));

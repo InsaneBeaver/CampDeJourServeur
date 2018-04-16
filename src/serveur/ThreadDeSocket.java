@@ -9,10 +9,12 @@ public class ThreadDeSocket extends Thread {
 
     private final Socket socket;
     private final InterfaceServeur interServ;
-    private RSAEncryption encryption = null;
+    private CryptoAES cryptoAES = null;
     private final RSADecryption decryption;
     public static int nbConnexions = 0;
     public static final int MAXCONNEXIONS = 10;
+    
+    
 
     public ThreadDeSocket(Socket clientSocket, InterfaceServeur interServ, RSADecryption decryption) {
         this.socket = clientSocket;
@@ -45,28 +47,22 @@ public class ThreadDeSocket extends Thread {
                     socket.close();
                     break;
                 } else if (!line.isEmpty()) {
-                    if (encryption == null) {
+                    if (cryptoAES == null) {
                         // On ramasse la clé publique.
-                        byte[] clePubliqueBytes = Base64.getDecoder().decode(line);
-                        encryption = new RSAEncryption(clePubliqueBytes);
-                                               
-                        // Par sécurité, on signe la ligne. 
-                        String sgn = decryption.creerSignature(line);
-                        System.out.println(sgn);
-                        RSAEncryption foobar = new RSAEncryption("clepubliqueserv");
-                        System.out.println(foobar.authentifierSignature(sgn, line));
-                        out.writeBytes(sgn+'\n');
+                        String ligneDecryptee = decryption.decrypter(line);
+                        cryptoAES = new CryptoAES(ligneDecryptee);
+                        out.writeBytes(cryptoAES.encryption(decryption.creerSignature(ligneDecryptee))+"\n");
                         out.flush();
                        
                     }
                     else
                     {
-
-                        line = decryption.decrypter(line);
+                        line = cryptoAES.decryption(line);
                         System.out.println("Le message: " + line);
                         
                         try {
-                            String message = encryption.encrypter(interServ.executerCommande(line));
+                            System.out.println(interServ.executerCommande(line));
+                            String message = cryptoAES.encryption(interServ.executerCommande(line));
                             out.writeBytes(message + "\n");
                         } catch (Exception e) {
                             e.printStackTrace();

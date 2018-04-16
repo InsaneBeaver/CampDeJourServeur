@@ -60,11 +60,11 @@ public class RSADecryption {
         return messageAvecBruit.substring(0, messageAvecBruit.length() - RSAUtil.TAILLE_BRUIT);
     }
         
-    public String creerSignature(String clePubliqueAutre) throws Exception
+    public String creerSignature(String message) throws Exception
     {   
         Signature signature = Signature.getInstance("SHA256withRSA");
         signature.initSign(clePrivee);
-        signature.update(clePubliqueAutre.getBytes());
+        signature.update(message.getBytes());
         return Base64Coder.encode(signature.sign());
     }
 }
