@@ -50,14 +50,20 @@ public class ThreadDeSocket extends Thread {
                     if (cryptoAES == null) {
                         // On ramasse la clé publique.
                         String ligneDecryptee = decryption.decrypter(line);
-                        cryptoAES = new CryptoAES(ligneDecryptee);
-                        out.writeBytes(cryptoAES.encryption(decryption.creerSignature(ligneDecryptee))+"\n");
+                        System.out.println(ligneDecryptee);
+                        CryptoAES cryptoAESTemp = new CryptoAES(ligneDecryptee);
+                        System.out.println(cryptoAESTemp.encryption("re"));
+                        cryptoAES = new CryptoAES();
+                        
+                        out.writeBytes(cryptoAESTemp.encryption(cryptoAES.getCle()) + "\n");
                         out.flush();
+                        System.out.println("Écrit");
                        
                     }
                     else
                     {
                         line = cryptoAES.decryption(line);
+                        if(!line.equals("ping"))
                         System.out.println("Le message: " + line);
                         
                         try {

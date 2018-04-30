@@ -9,6 +9,8 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
+import javax.crypto.KeyGenerator;
 import java.util.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -16,11 +18,29 @@ import javax.crypto.IllegalBlockSizeException;
 public class CryptoAES
 {
     private final static int TAILLEBRUIT = 16;
+    private SecretKey secretKey;
     private SecretKeySpec skeySpec;
     
     public CryptoAES(String cleEncodee)
     {
         skeySpec = new SecretKeySpec(Base64Coder.decode(cleEncodee), 0, 16, "AES");
+    }
+    
+    public CryptoAES()
+    {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(128);
+            secretKey = keyGen.generateKey();
+            skeySpec = new SecretKeySpec(secretKey.getEncoded(), "AES");
+        }
+        catch(Exception e) {}
+
+    }
+    
+    public String getCle()
+    {
+        return Base64Coder.encode(secretKey.getEncoded());
     }
     
     public String encryption(String message) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeyException

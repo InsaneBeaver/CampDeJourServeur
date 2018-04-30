@@ -28,6 +28,7 @@ public class BaseDeDonnees {
             connexion.createStatement().execute("CREATE TABLE " + TABLE_PARENTS_ENFANTS + " (mdphash varchar(256) NOT NULL UNIQUE, enfants varchar(1024))");
             connexion.createStatement().execute("CREATE TABLE " + TABLE_ENFANTS + " (nom varchar(64), prenom varchar(64), saitNager int, sexe varchar(1), id int NOT NULL UNIQUE, estPresent int, dateNaissance varchar(64))");
         }
+       
     }
     
     public String getEnfant(int id) throws SQLException
@@ -72,8 +73,11 @@ public class BaseDeDonnees {
        for(int i = 0; i < liste.length(); i++)
        {
            int id = liste.getInt(i);
-           listeARetourner.put(getEnfant(id));
+           String enfant_str = getEnfant(id);
+           if(!enfant_str.equals("{}"))
+            listeARetourner.put(enfant_str);
        }
+       
        return listeARetourner.toString();
     }
     
