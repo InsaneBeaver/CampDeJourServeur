@@ -2,14 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/E:/Serveur/src/serveur/RSADecryption.java</file>
-            <file>file:/E:/Serveur/src/serveur/RSAEncryption.java</file>
-            <file>file:/E:/Serveur/src/serveur/InterfaceServeur.java</file>
-            <file>file:/E:/Serveur/src/serveur/ThreadDeSocket.java</file>
-            <file>file:/E:/Serveur/src/serveur/RSAUtil.java</file>
-            <file>file:/E:/Serveur/src/serveur/Serveur.java</file>
-            <file>file:/E:/Serveur/src/serveur/BaseDeDonnees.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

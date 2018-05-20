@@ -3,87 +3,105 @@ package serveur;
 
 import java.io.*;
 import java.net.*;
-import java.util.Base64;
 
 public class ThreadDeSocket extends Thread {
 
     private final Socket socket;
     private final InterfaceServeur interServ;
     private CryptoAES cryptoAES = null;
-    private final RSADecryption decryption;
+    private final RSADecryption decryptionRSA;
     public static int nbConnexions = 0;
     public static final int MAXCONNEXIONS = 10;
     
-    
-
+    /**
+     * Constructeur.
+     * @param clientSocket L'objet socket
+     * @param interServ L'interface permettant d'exécuter des commandes
+     * @param decryption La fonctionnalité pour décrypter des messages encryptés avec la clé publique du serveur
+     */
     public ThreadDeSocket(Socket clientSocket, InterfaceServeur interServ, RSADecryption decryption) {
         this.socket = clientSocket;
         this.interServ = interServ;
-        this.decryption = decryption;
+        this.decryptionRSA = decryption;
     }
-
+    /**
+     * Lorsque le thread est exécuté
+     */
+    @Override
     public void run() {
         nbConnexions++;
-        System.out.println("nouvelle connexion");
-        InputStream inp = null;
-        BufferedReader brinp = null;
-        DataOutputStream out = null;
+        System.out.println("Nouvelle connexion avec " + socket.getRemoteSocketAddress().toString()+".");
+        InputStream inputStream = null;
+        BufferedReader bufferedReader = null;
+        DataOutputStream outputStream = null;
 
-        try {
-            inp = socket.getInputStream();
-            brinp = new BufferedReader(new InputStreamReader(inp));
-            out = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
+        try 
+        {
+            inputStream = socket.getInputStream();
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            outputStream = new DataOutputStream(socket.getOutputStream());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
             return;
         }
 
-        String line;
+        String ligneRecue;
 
         try {
             while (true) {
-                line = brinp.readLine();
+                ligneRecue = bufferedReader.readLine();
 
-                if ((line == null) || line.equalsIgnoreCase("QUIT")) {
+                if ((ligneRecue == null) || ligneRecue.equalsIgnoreCase("QUIT")) {
                     socket.close();
                     break;
-                } else if (!line.isEmpty()) {
+                } 
+                
+                else if (ligneRecue != null && !ligneRecue.isEmpty()) {
                     if (cryptoAES == null) {
-                        // On ramasse la clé publique.
-                        String ligneDecryptee = decryption.decrypter(line);
-                        System.out.println(ligneDecryptee);
+                        // On récupère la clé AES envoyée par le client, puis on s'en sert pour encrypter une nouvelle clé AES,
+                        // qu'on envoie au client et qui sera employée pour communiquer à partir de maintenant.
+                        System.out.println("LIGNE " + ligneRecue + " " +  " ...");
+                        System.out.println(BaseDeDonnees.getHash(ligneRecue));
+                        String ligneDecryptee = decryptionRSA.decrypter(ligneRecue);
                         CryptoAES cryptoAESTemp = new CryptoAES(ligneDecryptee);
-                        System.out.println(cryptoAESTemp.encryption("re"));
                         cryptoAES = new CryptoAES();
-                        
-                        out.writeBytes(cryptoAESTemp.encryption(cryptoAES.getCle()) + "\n");
-                        out.flush();
-                        System.out.println("Écrit");
-                       
+                        outputStream.writeBytes(cryptoAESTemp.encryption(cryptoAES.getCle()) + "\n");
                     }
                     else
                     {
-                        line = cryptoAES.decryption(line);
-                        if(!line.equals("ping"))
-                        System.out.println("Le message: " + line);
+                        ligneRecue = cryptoAES.decryption(ligneRecue);
                         
-                        try {
-                            System.out.println(interServ.executerCommande(line));
-                            String message = cryptoAES.encryption(interServ.executerCommande(line));
-                            out.writeBytes(message + "\n");
-                        } catch (Exception e) {
+                        try 
+                        {
+                            System.out.println(interServ.executerCommande(ligneRecue));
+                            String message = interServ.executerCommande(ligneRecue);
+                            if(!message.isEmpty())
+                            {
+                                for(String morceau : message.split("\n"))
+                                    outputStream.writeBytes(cryptoAES.encryption(morceau) + "\n");
+
+                            }                            
+                            outputStream.writeBytes("\n");
+                        } 
+                        
+                        catch (Exception e)
+                        {
                             e.printStackTrace();
                         }
-                        out.flush();
+                        outputStream.flush();
 
                     }
                 }
             }
-        } catch (Exception e) {
+        } 
+        catch (Exception e)
+        {
             e.printStackTrace();
-
         }
 
-        System.out.println("sorti");
+        System.out.println("Connexion terminée.");
         nbConnexions--;
     }
 }

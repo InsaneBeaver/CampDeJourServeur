@@ -92,7 +92,7 @@ public class Base64Coder {
 
     public static String encode(byte[] in)
     {
-        char[] encodage = encode(in, 0, in.length);;
+        char[] encodage = encode(in, 0, in.length);
         String res = "";
         for(char caractere : encodage) res += caractere;
         return res;

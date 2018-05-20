@@ -1,70 +1,67 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package serveur;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
+import java.nio.file.*;
+import java.security.*;
+import java.security.spec.*;
 import javax.crypto.Cipher;
 
-/**
- *
- * @author 11110305
- */
+
 public class RSADecryption {
      PrivateKey clePrivee;
      
-    public RSADecryption(String fichierClePrivee) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException
+    public final static int TAILLE_BRUIT = 16; // Caractères aléatoires mis à la fin du message. 16 caractères => une chance sur 5192296858534827628530496329220096 qu'un message soit encrypté de la même façon deux fois.
+    public final static int TAILLE_CLE = 2048;
+     
+    public static byte[] lireFichier(String chemin) throws IOException 
     {
-        this(RSAUtil.lireFichier(fichierClePrivee));
+        Path path = Paths.get(chemin);
+        return Files.readAllBytes(path);
     }
     
-        public final static String getHash(byte[] chaine)
+    /**
+     * Sert à initialiser l'interface de décryption à partir d'une clé dans un fichier
+     * @param fichierClePrivee Le fichier de clé privée
+     * @throws IOException 
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException 
+     */
+    public RSADecryption(String fichierClePrivee) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException
     {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String hash = Base64Coder.encode(digest.digest(chaine));
-            return hash;
-        }
-        catch(Exception e) {}
-        return "";
+        this(lireFichier(fichierClePrivee));
     }
+   
+    /**
+     * Sert à initialiser l'interface de décryption à partir d'une clé
+     * @param clePrivee
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException 
+     */
     public RSADecryption(byte[] clePrivee) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
         KeyFactory kf = KeyFactory.getInstance("RSA");
 
         PKCS8EncodedKeySpec spec2 = new  PKCS8EncodedKeySpec(clePrivee);
         this.clePrivee = kf.generatePrivate(spec2); 
-        System.out.println("RECU " + getHash(clePrivee));
+
     }
     
-    public String decrypter(String message) throws Exception
+    /**
+     * Sert a décoder un message crypté
+     * @param messageCrypte
+     * @return Le message original
+     * @throws Exception 
+     */
+    public String decrypter(String messageCrypte) throws Exception
     {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.DECRYPT_MODE, clePrivee);
-        System.out.println("objet " + getHash(Base64Coder.decode(message)));
-        String messageAvecBruit = new String(cipher.doFinal(Base64Coder.decode(message)));
+        String messageAvecBruit = new String(cipher.doFinal(Base64Coder.decode(messageCrypte)));
         
         // Enlever le bruit
-        return messageAvecBruit.substring(0, messageAvecBruit.length() - RSAUtil.TAILLE_BRUIT);
+        return messageAvecBruit.substring(0, messageAvecBruit.length() - TAILLE_BRUIT);
     }
         
-    public String creerSignature(String message) throws Exception
-    {   
-        Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initSign(clePrivee);
-        signature.update(message.getBytes());
-        return Base64Coder.encode(signature.sign());
-    }
+
 }

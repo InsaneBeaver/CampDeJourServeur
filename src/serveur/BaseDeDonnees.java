@@ -15,12 +15,16 @@ public class BaseDeDonnees {
   
     Connection connexion;
     
+    /**
+     * Constructeur
+     * @throws SQLException
+     * @throws ClassNotFoundException 
+     */
     public BaseDeDonnees() throws SQLException, ClassNotFoundException
     {
         Class.forName("org.sqlite.JDBC");
         File f = new File(NOM_BASE);
         boolean existe = f.exists();
-        
         connexion = DriverManager.getConnection("jdbc:sqlite:"+NOM_BASE);
 
         if(!existe)
@@ -31,6 +35,12 @@ public class BaseDeDonnees {
        
     }
     
+    /**
+     * Retourne un enfant sous forme JSON 
+     * @param id L'identifiant de l'enfant
+     * @return L'enfant sous forme JSON
+     * @throws SQLException 
+     */
     public String getEnfant(int id) throws SQLException
     {
         JSONObject obj = new JSONObject();
@@ -47,26 +57,50 @@ public class BaseDeDonnees {
 
     }
     
+    /**
+     * Change la présence de l'enfant dans la base de données
+     * @param id L'identifiant
+     * @param nouvelEtat Le nouvel état
+     * @throws SQLException 
+     */
     public void changerPresence(int id, int nouvelEtat) throws SQLException
     {
         connexion.createStatement().execute("UPDATE " + TABLE_ENFANTS + " SET estPresent='" + nouvelEtat + "' WHERE id=" + id);
     }
     
+    /**
+     * Vérifie si l'individu associé à ce mot de passe a le droit d'avoir accès à l'enfant
+     * @param hash Le mot de passe hashé
+     * @param id L'identifiant de l'enfant
+     * @return Si permis
+     * @throws SQLException 
+     */
     public boolean estPermis(String hash, int id) throws SQLException
     {
-        System.out.println("LE HASH " + hash);
+
         ResultSet rs = connexion.createStatement().executeQuery("SELECT enfants from " + TABLE_PARENTS_ENFANTS + " where mdphash='" + hash+"'");
-        rs.next();
+        if(!rs.next()) 
+            return false;
+        
         JSONArray liste = new JSONArray(rs.getString("enfants"));
         boolean estPermis = false;
-        for(int i = 0; i < liste.length() && !estPermis; i++) estPermis |= liste.getInt(i) == id;
+        for(int i = 0; i < liste.length() && !estPermis; i++) 
+            estPermis |= liste.getInt(i) == id;
+        
         return estPermis;
     }
     
-    public String getEnfants(String mdpHashe) throws SQLException
+    /**
+     * Retourne les enfants associés au mot de passe
+     * @param mdpHashe Le mot de passe hashé
+     * @return Les enfants en format JSON
+     * @throws SQLException 
+     */
+    public String getEnfantsParent(String mdpHashe) throws SQLException
     {
        ResultSet rs = connexion.createStatement().executeQuery("SELECT * from " + TABLE_PARENTS_ENFANTS + " where mdphash='" + mdpHashe + "'");
-       if(!rs.next()) return "[]";
+       if(!rs.next()) return null;
+       String resultat = "";
        
        JSONArray liste = new JSONArray(rs.getString("enfants"));
        JSONArray listeARetourner = new JSONArray();
@@ -75,12 +109,38 @@ public class BaseDeDonnees {
            int id = liste.getInt(i);
            String enfant_str = getEnfant(id);
            if(!enfant_str.equals("{}"))
-            listeARetourner.put(enfant_str);
+            resultat += enfant_str + "\n";
        }
        
-       return listeARetourner.toString();
+
+       
+       return resultat;
     }
     
+    /**
+     * Retourne les enfants associés à l'administrateur suprême, c'est-à-dire tous.
+     * @return Les enfants sous forme JSON
+     * @throws SQLException 
+     */
+    public String getEnfantsAdmin() throws SQLException
+    {
+        ResultSet rs = connexion.createStatement().executeQuery("SELECT id from " + TABLE_ENFANTS);
+        String resultat = "";
+        while(rs.next())
+        {
+           int id = rs.getInt("id");
+           String enfant_str = getEnfant(id);
+           if(!enfant_str.equals("{}"))
+           resultat+=enfant_str+"\n";
+        }
+        
+        return resultat;
+        
+    }
+    
+    // Fonctions pour ajouter des enfants et des parents dans la base de données. Devrait normalement être fait depuis l'interface
+    // graphique. Ces fonctions sont gardées pour faire du déboguage seulement.
+    /*
     public void mettreEnfant(String prenom, String nom, int id, boolean saitNager, String sexe, boolean estPresent, String dateNaissance) throws SQLException
     {
         String valId = ""+id;
@@ -96,12 +156,18 @@ public class BaseDeDonnees {
         System.out.println("insert into " + TABLE_PARENTS_ENFANTS + " values ('" + getHash(mdp) + "', '" + listeIds + "'");
         connexion.createStatement().execute("insert into " + TABLE_PARENTS_ENFANTS + " values ('" + getHash(mdp) + "', '" + listeIds + "')");
     }
+*/
     
+    /**
+     * Sert à calculer le hash d'une chaîne de caractères
+     * @param chaine La chaine
+     * @return Le hash
+     */
     public final static String getHash(String chaine)
     {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String hash = Base64.getEncoder().encodeToString(digest.digest(chaine.getBytes(StandardCharsets.UTF_8)));
+            String hash = Base64Coder.encode(digest.digest(chaine.getBytes(StandardCharsets.UTF_8)));
             return hash;
         }
         catch(Exception e) {}

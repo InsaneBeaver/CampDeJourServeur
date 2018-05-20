@@ -1,27 +1,28 @@
-
 package serveur;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
 import java.sql.SQLException;
-import org.json.JSONArray;
-
-
 
 public class InterfaceServeur
 {
     public final BaseDeDonnees bdd;
+    String mdpAdmin = "cJL9jWxwUc77PhgkZXlZT3/ddTqL+LhDwub80GVnN4Q="; // carotte
+    
+    /**
+     * Constructeur
+     * @throws SQLException
+     * @throws ClassNotFoundException 
+     */
     public InterfaceServeur() throws SQLException, ClassNotFoundException
     {
         bdd = new BaseDeDonnees();
     }
     
+    /**
+     * Exécute une commande du client et retourne le résultat
+     * @param cmd Commande reçue
+     * @return Résultat
+     * @throws SQLException Si un incident regrettable s'est produit
+     */
     String executerCommande(String cmd) throws SQLException
     {
         try {
@@ -31,7 +32,12 @@ public class InterfaceServeur
             if(decoupage.length > 1) 
                 mdpHashe = bdd.getHash(decoupage[1]);
             if(nomCommande.equals("liste"))
-                return getListeEnfants(mdpHashe);
+            {
+                if(mdpAdmin.equals(mdpHashe))
+                    return bdd.getEnfantsAdmin();
+                else
+                    return bdd.getEnfantsParent(mdpHashe);
+            }
 
             else if(nomCommande.equals("getenfant") && estPermis(mdpHashe, Integer.parseInt(decoupage[2])))
                 return bdd.getEnfant(Integer.parseInt(decoupage[2]));
@@ -41,13 +47,7 @@ public class InterfaceServeur
                 bdd.changerPresence(Integer.parseInt(decoupage[2]), Integer.parseInt(decoupage[3]));
                 return "ok";
             }
-/*
-            else if(decoupage[0].equals("ajoutparent") && bdd.getHash(decoupage[1]).equals(hashMdpAdmin))
-            {
-                bdd.mettreParent(decoupage[2], decoupage[3]);
-                return "ok";
-            }
-*/
+            // Commande qui sert juste à vérifier que la connexion est toujours en place
             else if(nomCommande.equals("ping"))
                 return "pong";
 
@@ -61,13 +61,15 @@ public class InterfaceServeur
         
     }
     
-    String getListeEnfants(String mdp) throws SQLException
-    {
-        return bdd.getEnfants(mdp);
-    }
-    
+    /**
+     * Vérifie si l'utilisateur ayant le mot de passe en question à accès à l'enfant à l'id
+     * @param mdpHashe Mot de passe hashé de l'utilisateur
+     * @param id Id de l'enfant
+     * @return Si permis
+     * @throws SQLException 
+     */
     boolean estPermis(String mdpHashe, int id) throws SQLException
     {
-        return bdd.estPermis(mdpHashe, id);
+        return mdpHashe.equals(mdpAdmin) || bdd.estPermis(mdpHashe, id);
     }
 }

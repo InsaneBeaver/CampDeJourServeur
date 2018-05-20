@@ -11,8 +11,6 @@ public class Serveur {
 
      public static void main(String args[]) throws Exception{
          RSADecryption decryption = new RSADecryption("clepriveeserv");
-         RSAEncryption encryption = new RSAEncryption("clepubliqueserv");
-
          
          ServerSocket serverSocket;
          InterfaceServeur interfaceServeur = new InterfaceServeur();
@@ -20,12 +18,14 @@ public class Serveur {
 
         try {
             serverSocket = new ServerSocket(PORT);
+            System.out.println("Commence à écouter ...");
             while(true) 
             {
                 try{
                     if(ThreadDeSocket.nbConnexions < ThreadDeSocket.MAXCONNEXIONS)
                     {
                         socket = serverSocket.accept();
+                        
                         new ThreadDeSocket(socket, interfaceServeur, decryption).start();
                     }
                 }
