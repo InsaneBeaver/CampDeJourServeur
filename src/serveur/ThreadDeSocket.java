@@ -12,6 +12,12 @@ public class ThreadDeSocket extends Thread {
     private final RSADecryption decryptionRSA;
     public static int nbConnexions = 0;
     public static final int MAXCONNEXIONS = 10;
+    private String hashCommun;
+    
+    private void actualiserHashCommun(String message)
+    {
+        hashCommun = BaseDeDonnees.getHash(hashCommun + message);
+    }
 
     /**
      * Constructeur.
@@ -25,7 +31,10 @@ public class ThreadDeSocket extends Thread {
         this.socket = clientSocket;
         this.interServ = interServ;
         this.decryptionRSA = decryption;
+        this.hashCommun = " ";
     }
+    
+    
 
     /**
      * Lorsque le thread est exécuté
@@ -60,36 +69,25 @@ public class ThreadDeSocket extends Thread {
                     if (cryptoAES == null) {
                         // On récupère la clé AES envoyée par le client, puis on s'en sert pour encrypter une nouvelle clé AES,
                         // qu'on envoie au client et qui sera employée pour communiquer à partir de maintenant.
-                        System.out.println("LIGNE " + ligneRecue + " " + " ...");
-                        System.out.println(BaseDeDonnees.getHash(ligneRecue));
                         String ligneDecryptee = decryptionRSA.decrypter(ligneRecue);
                         CryptoAES cryptoAESTemp = new CryptoAES(ligneDecryptee);
                         cryptoAES = new CryptoAES();
                         outputStream.writeBytes(cryptoAESTemp.encryption(cryptoAES.getCle()) + "\n");
                     } else {
                         String messageRecu = cryptoAES.decryption(ligneRecue);
-
+                        actualiserHashCommun(messageRecu);
                         try {
-                            System.out.println(interServ.executerCommande(messageRecu));
                             String message = interServ.executerCommande(messageRecu);
                             if (!message.isEmpty()) {
                                 String lignes[] = message.split("\n");
-                                
-                                // On commence par envoyer un message authentifiant la réception et annonçant ce qui va suivre pour empêcher que l'on 
-                                // joue dans les paquets qui sont envoyés. 
-                                String messageSecurite = "";
-                                messageSecurite += ligneRecue;
+                               
                                 for(String morceau : lignes)
-                                    messageSecurite += morceau;                                
+                                    actualiserHashCommun(morceau);
                                 
-                                String foo = cryptoAES.encryption(BaseDeDonnees.getHash(messageSecurite) + " " + System.currentTimeMillis());
                                 
-                                System.out.println("Envoyé \\" + foo + "\\");
-                                System.out.println("Traduction " + cryptoAES.decryption(foo));
-             
-                                outputStream.writeBytes(foo + "\n");
+                                outputStream.writeBytes(cryptoAES.encryption(hashCommun) + "\n");
                                 
-                                for (String morceau : lignes) {
+                                for (String morceau : lignes) {                                    
                                     outputStream.writeBytes(cryptoAES.encryption(morceau) + "\n");
                                 }
 
