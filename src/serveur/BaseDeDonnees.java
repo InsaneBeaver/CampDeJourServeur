@@ -99,7 +99,7 @@ public class BaseDeDonnees {
     public String getEnfantsParent(String mdpHashe) throws SQLException
     {
        ResultSet rs = connexion.createStatement().executeQuery("SELECT * from " + TABLE_PARENTS_ENFANTS + " where mdphash='" + mdpHashe + "'");
-       if(!rs.next()) return "[]";
+       if(!rs.next()) return "";
        String resultat = "";
        
        JSONArray liste = new JSONArray(rs.getString("enfants"));
