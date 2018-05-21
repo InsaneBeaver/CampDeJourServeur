@@ -9,8 +9,7 @@ import java.util.*;
 public class CryptoAES
 {
     private final static int TAILLEBRUIT = 16; // La taille du bruit mis à la fin de chaque message
-    private SecretKey secretKey;
-    private SecretKeySpec skeySpec;
+    private final SecretKeySpec skeySpec;
     
     /**
      * Constructeur pour si la clé vient d'ailleurs
@@ -24,16 +23,12 @@ public class CryptoAES
     /**
      * Constructeur pour créer un nouveau système avec une nouvelle clé
      */
-    public CryptoAES()
+    public CryptoAES() throws Exception
     {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(128);
-            secretKey = keyGen.generateKey();
-            skeySpec = new SecretKeySpec(secretKey.getEncoded(), "AES");
-        }
-        catch(Exception e) {}
-
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(128);
+        SecretKey secretKey = keyGen.generateKey();
+        skeySpec = new SecretKeySpec(secretKey.getEncoded(), "AES");
     }
     
     /**
@@ -42,7 +37,7 @@ public class CryptoAES
      */
     public String getCle()
     {
-        return Base64Coder.encode(secretKey.getEncoded());
+        return Base64Coder.encode(skeySpec.getEncoded());
     }
     
     

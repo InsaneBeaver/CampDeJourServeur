@@ -9,8 +9,14 @@ public class Serveur {
     private final static int PORT = 2000;
     
 
+    /**
+     * Fonction principale
+     * @param args
+     * @throws Exception 
+     */
      public static void main(String args[]) throws Exception{
          RSADecryption decryption = new RSADecryption("clepriveeserv");
+         CryptoAES foo = new CryptoAES();
          
          ServerSocket serverSocket;
          InterfaceServeur interfaceServeur = new InterfaceServeur();

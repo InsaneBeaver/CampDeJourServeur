@@ -5,7 +5,7 @@ import java.sql.SQLException;
 public class InterfaceServeur
 {
     public final BaseDeDonnees bdd;
-    String mdpAdmin = "cJL9jWxwUc77PhgkZXlZT3/ddTqL+LhDwub80GVnN4Q="; // carotte
+    private final static String mdpAdmin = "cJL9jWxwUc77PhgkZXlZT3/ddTqL+LhDwub80GVnN4Q="; // carotte
     
     /**
      * Constructeur
@@ -23,7 +23,7 @@ public class InterfaceServeur
      * @return Résultat
      * @throws SQLException Si un incident regrettable s'est produit
      */
-    String executerCommande(String cmd) throws SQLException
+    public String executerCommande(String cmd) throws SQLException
     {
         try {
             String[] decoupage = cmd.split(" ");
@@ -68,7 +68,7 @@ public class InterfaceServeur
      * @return Si permis
      * @throws SQLException 
      */
-    boolean estPermis(String mdpHashe, int id) throws SQLException
+    private boolean estPermis(String mdpHashe, int id) throws SQLException
     {
         return mdpHashe.equals(mdpAdmin) || bdd.estPermis(mdpHashe, id);
     }

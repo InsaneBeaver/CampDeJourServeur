@@ -1,28 +1,19 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package serveur;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.*;
-import java.util.*;
-import javax.crypto.Cipher;
+import java.io.*;
+import java.nio.file.*;
+import java.security.*;
+
 
 public class RSAUtil {
     
+    /**
+     * Sert à initialiser une paire de clés.
+     * @param fichierClePublique Le fichier dans lequel la fonction va écrire la clé publique
+     * @param fichierClePrivee Le fichier dans lequel la fonction va écrire la clé privée
+     * @throws Exception 
+     */
     public static void initialiserCles(String fichierClePublique, String fichierClePrivee) throws Exception
     {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -41,6 +32,12 @@ public class RSAUtil {
         
     }
     
+    /**
+     * Pour lire un fichier binaire
+     * @param chemin Le chemin du fichier
+     * @return Le contenu du fichier
+     * @throws IOException 
+     */
     public static byte[] lireFichier(String chemin) throws IOException
     {
         Path path = Paths.get(chemin);
