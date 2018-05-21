@@ -65,7 +65,7 @@ public class ThreadDeSocket extends Thread {
                 if ((ligneRecue == null) || ligneRecue.equalsIgnoreCase("QUIT")) {
                     socket.close();
                     break;
-                } else if (ligneRecue != null && !ligneRecue.isEmpty()) {
+                } else if (!ligneRecue.isEmpty()) {
                     if (cryptoAES == null) {
                         // On récupère la clé AES envoyée par le client, puis on s'en sert pour encrypter une nouvelle clé AES,
                         // qu'on envoie au client et qui sera employée pour communiquer à partir de maintenant.
