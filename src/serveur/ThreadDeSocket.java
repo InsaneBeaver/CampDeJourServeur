@@ -70,18 +70,14 @@ public class ThreadDeSocket extends Thread {
                     if (cryptoAES == null) {
                         // On récupère la clé AES envoyée par le client, puis on s'en sert pour encrypter une nouvelle clé AES,
                         // qu'on envoie au client et qui sera employée pour communiquer à partir de maintenant.
-                        System.out.println("LIGNE " + ligneRecue + " " + " ...");
-                        System.out.println(BaseDeDonnees.getHash(ligneRecue));
                         String ligneDecryptee = decryptionRSA.decrypter(ligneRecue);
                         CryptoAES cryptoAESTemp = new CryptoAES(ligneDecryptee);
                         cryptoAES = new CryptoAES();
                         outputStream.writeBytes(cryptoAESTemp.encryption(cryptoAES.getCle()) + "\n");
                     } else {
                         String messageRecu = cryptoAES.decryption(ligneRecue);
-						System.out.println(messageRecu);
                         actualiserHashCommun(messageRecu);
                         try {
-                            System.out.println(interServ.executerCommande(messageRecu));
                             String message = interServ.executerCommande(messageRecu);
                             if (!message.isEmpty()) {
                                 String lignes[] = message.split("\n");

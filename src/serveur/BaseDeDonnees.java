@@ -153,7 +153,6 @@ public class BaseDeDonnees {
     
     public void mettreParent(String mdp, String listeIds) throws SQLException
     {
-        System.out.println("insert into " + TABLE_PARENTS_ENFANTS + " values ('" + getHash(mdp) + "', '" + listeIds + "'");
         connexion.createStatement().execute("insert into " + TABLE_PARENTS_ENFANTS + " values ('" + getHash(mdp) + "', '" + listeIds + "')");
     }
 */
