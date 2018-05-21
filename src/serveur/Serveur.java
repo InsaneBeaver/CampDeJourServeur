@@ -6,7 +6,7 @@ import java.net.*;
 // Emprunté ici https://stackoverflow.com/questions/10131377/socket-programming-multiple-client-to-one-server
 public class Serveur {
     
-    private final static int PORT = 2007;
+    private final static int PORT = 2000;
     
 
      public static void main(String args[]) throws Exception{
